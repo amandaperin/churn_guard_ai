@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:15
+    container_name: churn_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: dudawendy
+      POSTGRES_DB: churn_guard_ai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: churn_api
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.docker
+
+volumes:
+  postgres_data:

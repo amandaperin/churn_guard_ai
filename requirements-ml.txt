@@ -1,0 +1,3 @@
+xgboost==1.7.6
+pytest
+scikit-learn
