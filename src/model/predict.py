@@ -1,10 +1,12 @@
+import json
 import os
+import pickle
+from pathlib import Path
 
 import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
-from xgboost import XGBClassifier
 
 
 # Load environment variables from the .env file
@@ -16,13 +18,13 @@ DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 DB_NAME = os.getenv("DB_NAME")
 
-# Define the classification threshold used to convert probabilities into classes
-THRESHOLD = 0.3
+MODEL_PATH = Path("models/churn_model.pkl")
+METADATA_PATH = Path("models/model_metadata.json")
 
 
 def main() -> None:
     try:
-        # Validate required environment variables
+        # Validate environment variables
         required_env_vars = {
             "DB_USER": DB_USER,
             "DB_PASSWORD": DB_PASSWORD,
@@ -37,62 +39,52 @@ def main() -> None:
                 f"Missing required environment variables: {', '.join(missing_vars)}"
             )
 
-        # Create PostgreSQL connection
+        if not MODEL_PATH.exists():
+            raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
+
+        if not METADATA_PATH.exists():
+            raise FileNotFoundError(f"Metadata file not found: {METADATA_PATH}")
+
+        print("Loading saved model and metadata...")
+
+        with open(MODEL_PATH, "rb") as f:
+            model = pickle.load(f)
+
+        with open(METADATA_PATH, "r", encoding="utf-8") as f:
+            metadata = json.load(f)
+
+        threshold = metadata["threshold"]
+        feature_columns = metadata["feature_columns"]
+
         engine = create_engine(
             f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
         )
 
         print("Loading feature table from database...")
 
-        # Load the model-ready feature table
-        df = pd.read_sql(
-            "SELECT * FROM features.customer_churn_features",
-            engine,
-        )
+        df = pd.read_sql("SELECT * FROM features.customer_churn_features", engine)
 
-        print(f"Loaded dataset shape: {df.shape}")
+        X = df[feature_columns]
 
-        # Separate features and target
-        X = df.drop(columns=["customer_id", "churn"])
-        y = df["churn"]
+        print("Generating predictions using saved model...")
 
-        print("Training XGBoost model on full feature table...")
-
-        # Train the final model using the full dataset
-        model = XGBClassifier(
-            random_state=42,
-            n_estimators=200,
-            learning_rate=0.05,
-            max_depth=4,
-            subsample=0.8,
-            colsample_bytree=0.8,
-            eval_metric="logloss",
-        )
-        model.fit(X, y)
-
-        print("Generating predictions...")
-
-        # Generate churn probabilities
         proba = model.predict_proba(X)[:, 1]
 
-        # Apply the custom threshold to generate class predictions
         df_predictions = pd.DataFrame(
             {
                 "customer_id": df["customer_id"],
                 "churn_probability": proba,
-                "churn_prediction": (proba >= THRESHOLD).astype(int),
+                "churn_prediction": (proba >= threshold).astype(int),
             }
         )
 
         print("Clearing old predictions from gold.churn_predictions...")
 
-        # Remove previous predictions before inserting the new ones
         with engine.begin() as connection:
             connection.execute(text("TRUNCATE TABLE gold.churn_predictions;"))
 
         print("Saving predictions to PostgreSQL...")
 
-        # Save the predictions into the gold layer
         df_predictions.to_sql(
             name="churn_predictions",
             con=engine,
@@ -102,9 +94,12 @@ def main() -> None:
         )
 
         print(
-            f"Success: {len(df_predictions)} predictions saved to "
-            f"gold.churn_predictions using threshold {THRESHOLD}"
+            f"Success: {len(df_predictions)} predictions saved to gold.churn_predictions "
+            f"using saved model and threshold {threshold}"
         )
+
+    except FileNotFoundError as e:
+        print(f"File error: {e}")
 
     except ValueError as e:
         print(f"Configuration error: {e}")

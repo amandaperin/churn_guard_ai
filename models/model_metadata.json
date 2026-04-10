@@ -1,0 +1,19 @@
+{
+  "roc_auc": 0.835233408251311,
+  "precision": 0.525233644859813,
+  "recall": 0.7513368983957219,
+  "f1": 0.6182618261826183,
+  "threshold": 0.3,
+  "feature_columns": [
+    "gender_encoded",
+    "senior_citizen",
+    "has_partner",
+    "has_dependents",
+    "tenure",
+    "monthly_charges",
+    "total_charges",
+    "contract_type",
+    "paperless_billing_encoded"
+  ],
+  "model_name": "XGBoost"
+}

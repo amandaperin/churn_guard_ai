@@ -1,126 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ChurnGuard AI</title>
-<link rel="stylesheet" href="/static/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChurnGuard AI</title>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-<div class="container">
-<header>
-<h1>ChurnGuard AI</h1>
-<p>Ask questions about churn risk, customers, and retention actions.</p>
-</header>
+  <div class="container">
+    <header class="hero">
+      <div class="brand">
+        <img src="/static/logo.png" alt="ChurnGuard AI logo" class="logo" />
+        <div class="brand-text">
+          <h1>ChurnGuard AI</h1>
+          <p>Customer churn intelligence with AI-powered recommendations.</p>
+        </div>
+      </div>
+    </header>
 
-<main>
-<section class="chat-box">
-<textarea id="question" placeholder="Type your question here..."></textarea>
-<button id="ask-button">Ask ChurnGuard AI</button>
-</section>
+    <main>
+      <section class="chat-box">
+        <label for="question" class="section-title">Ask a question</label>
+        <textarea
+          id="question"
+          placeholder="Example: What customers are in high risk of churn and why?"
+        ></textarea>
+        <button id="ask-button">Ask ChurnGuard AI</button>
+      </section>
 
-<section class="examples">
-<h2>Example questions</h2>
-<ul>
-<li>Give me a churn risk summary.</li>
-<li>What customers are in high risk of churn and why?</li>
-<li>Analyze customer 2024-BASKD.</li>
-<li>What are the main churn drivers?</li>
-</ul>
-</section>
+      <section class="examples">
+        <h2>Example questions</h2>
+        <div class="example-list">
+          <button class="example-btn">Give me a churn risk summary.</button>
+          <button class="example-btn">What customers are in high risk of churn and why?</button>
+          <button class="example-btn">Analyze customer 2024-BASKD.</button>
+          <button class="example-btn">What are the main churn drivers?</button>
+        </div>
+      </section>
 
-<section class="response-section">
-<h2>Response</h2>
-<div id="response-card" class="response-card hidden">
-<h3>Summary</h3>
-<p id="summary"></p>
+      <section class="response-section">
+        <h2>Response</h2>
+        <div id="loading" class="loading hidden">Thinking...</div>
 
-<div id="customer-recommendations-container" class="hidden">
-<h3>Customer Recommendations</h3>
-<div id="customer-recommendations"></div>
-</div>
+        <div id="response-card" class="response-card hidden">
+          <div class="response-block">
+            <h3>Summary</h3>
+            <p id="summary">No summary yet.</p>
+          </div>
 
-<div id="priority-actions-container" class="hidden">
-<h3>Priority Actions</h3>
-<p id="priority-actions"></p>
-</div>
-</div>
-</section>
-</main>
-</div>
+          <div id="customer-recommendations-container" class="response-block hidden">
+            <h3>Customer Recommendations</h3>
+            <div id="customer-recommendations"></div>
+          </div>
 
-<script>
-const askButton = document.getElementById("ask-button");
-const questionInput = document.getElementById("question");
-const responseCard = document.getElementById("response-card");
-const summaryEl = document.getElementById("summary");
-const customerRecommendationsContainer = document.getElementById("customer-recommendations-container");
-const customerRecommendationsEl = document.getElementById("customer-recommendations");
-const priorityActionsContainer = document.getElementById("priority-actions-container");
-const priorityActionsEl = document.getElementById("priority-actions");
+          <div id="priority-actions-container" class="response-block hidden">
+            <h3>Priority Actions</h3>
+            <p id="priority-actions"></p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 
-askButton.addEventListener("click", async () => {
-const question = questionInput.value.trim();
+  <script>
+    const questionInput = document.getElementById("question");
+    const askButton = document.getElementById("ask-button");
+    const loadingEl = document.getElementById("loading");
 
-if (!question) {
-alert("Please type a question.");
-return;
-}
+    const responseCard = document.getElementById("response-card");
+    const summaryEl = document.getElementById("summary");
 
-askButton.disabled = true;
-askButton.textContent = "Thinking...";
+    const customerRecommendationsContainer = document.getElementById("customer-recommendations-container");
+    const customerRecommendationsEl = document.getElementById("customer-recommendations");
 
-try {
-const response = await fetch("/chat", {
-method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
-body: JSON.stringify({ question })
-});
+    const priorityActionsContainer = document.getElementById("priority-actions-container");
+    const priorityActionsEl = document.getElementById("priority-actions");
 
-const result = await response.json();
+    const exampleButtons = document.querySelectorAll(".example-btn");
 
-const structured = result.response || {};
+    exampleButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        questionInput.value = button.textContent;
+      });
+    });
 
-summaryEl.textContent = structured.summary || "No summary available.";
+    async function askQuestion() {
+      const question = questionInput.value.trim();
 
-const recommendations = structured.customer_recommendations || [];
-customerRecommendationsEl.innerHTML = "";
+      if (!question) {
+        alert("Please type a question.");
+        return;
+      }
 
-if (recommendations.length > 0) {
-customerRecommendationsContainer.classList.remove("hidden");
+      askButton.disabled = true;
+      loadingEl.classList.remove("hidden");
+      responseCard.classList.add("hidden");
 
-recommendations.forEach((item) => {
-const card = document.createElement("div");
-card.className = "mini-card";
-card.innerHTML = `
-<strong>${item.customer_id}</strong>
-<p><strong>Reason:</strong> ${item.reason}</p>
-<p><strong>Recommended action:</strong> ${item.recommended_action}</p>
-`;
-customerRecommendationsEl.appendChild(card);
-});
-} else {
-customerRecommendationsContainer.classList.add("hidden");
-}
+      summaryEl.textContent = "";
+      customerRecommendationsEl.innerHTML = "";
+      priorityActionsEl.textContent = "";
 
-if (structured.priority_actions) {
-priorityActionsContainer.classList.remove("hidden");
-priorityActionsEl.textContent = structured.priority_actions;
-} else {
-priorityActionsContainer.classList.add("hidden");
-}
+      customerRecommendationsContainer.classList.add("hidden");
+      priorityActionsContainer.classList.add("hidden");
 
-responseCard.classList.remove("hidden");
-} catch (error) {
-alert("An error occurred while contacting the API.");
-console.error(error);
-} finally {
-askButton.disabled = false;
-askButton.textContent = "Ask ChurnGuard AI";
-}
-});
-</script>
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ question: question })
+        });
+
+        if (!response.ok) {
+          throw new Error("API request failed.");
+        }
+
+        const result = await response.json();
+        const structured = result.response || {};
+
+        summaryEl.textContent = structured.summary || "No summary available.";
+
+        const recommendations = structured.customer_recommendations || [];
+        if (recommendations.length > 0) {
+          customerRecommendationsContainer.classList.remove("hidden");
+
+          recommendations.forEach((item) => {
+            const card = document.createElement("div");
+            card.className = "mini-card";
+
+            const customerId = item.customer_id || "Unknown customer";
+            const reason = item.reason || "No reason provided.";
+            const action = item.recommended_action || "No action provided.";
+
+            card.innerHTML = `
+              <h4>${customerId}</h4>
+              <p><strong>Reason:</strong> ${reason}</p>
+              <p><strong>Recommended action:</strong> ${action}</p>
+            `;
+
+            customerRecommendationsEl.appendChild(card);
+          });
+        }
+
+        if (structured.priority_actions) {
+          priorityActionsContainer.classList.remove("hidden");
+          priorityActionsEl.textContent = structured.priority_actions;
+        }
+
+        responseCard.classList.remove("hidden");
+      } catch (error) {
+        alert("An error occurred while contacting the API.");
+        console.error(error);
+      } finally {
+        askButton.disabled = false;
+        loadingEl.classList.add("hidden");
+      }
+    }
+
+    askButton.addEventListener("click", askQuestion);
+
+    questionInput.addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        askQuestion();
+      }
+    });
+  </script>
 </body>
 </html>
