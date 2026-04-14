@@ -1,0 +1,11 @@
+.venv
+__pycache__
+.pytest_cache
+.git
+.env
+.env.docker
+*.pyc
+*.pyd
+postgres_data
+reports
+models

@@ -1,0 +1,184 @@
+{
+  "dataset": "silver.telco_customers_clean",
+  "row_count": 7043,
+  "chi_square_tests": [
+    {
+      "variable": "gender",
+      "test": "chi_square",
+      "chi2_statistic": 0.4841,
+      "p_value": 0.486579,
+      "degrees_of_freedom": 1,
+      "cramers_v": 0.0083,
+      "significant_at_0_05": false
+    },
+    {
+      "variable": "phone_service",
+      "test": "chi_square",
+      "chi2_statistic": 0.915,
+      "p_value": 0.338783,
+      "degrees_of_freedom": 1,
+      "cramers_v": 0.0114,
+      "significant_at_0_05": false
+    },
+    {
+      "variable": "multiple_lines",
+      "test": "chi_square",
+      "chi2_statistic": 11.3304,
+      "p_value": 0.003464,
+      "degrees_of_freedom": 2,
+      "cramers_v": 0.0401,
+      "significant_at_0_05": true
+    },
+    {
+      "variable": "internet_service",
+      "test": "chi_square",
+      "chi2_statistic": 732.3096,
+      "p_value": 0.0,
+      "degrees_of_freedom": 2,
+      "cramers_v": 0.3225,
+      "significant_at_0_05": true
+    },
+    {
+      "variable": "online_security",
+      "test": "chi_square",
+      "chi2_statistic": 849.999,
+      "p_value": 0.0,
+      "degrees_of_freedom": 2,
+      "cramers_v": 0.3474,
+      "significant_at_0_05": true
+    },
+    {
+      "variable": "online_backup",
+      "test": "chi_square",
+      "chi2_statistic": 601.8128,
+      "p_value": 0.0,
+      "degrees_of_freedom": 2,
+      "cramers_v": 0.2923,
+      "significant_at_0_05": true
+    },
+    {
+      "variable": "device_protection",
+      "test": "chi_square",
+      "chi2_statistic": 558.4194,
+      "p_value": 0.0,
+      "degrees_of_freedom": 2,
+      "cramers_v": 0.2816,
+      "significant_at_0_05": true
+    },
+    {
+      "variable": "tech_support",
+      "test": "chi_square",
+      "chi2_statistic": 828.1971,
+      "p_value": 0.0,
+      "degrees_of_freedom": 2,
+      "cramers_v": 0.3429,
+      "significant_at_0_05": true
+    },
+    {
+      "variable": "streaming_tv",
+      "test": "chi_square",
+      "chi2_statistic": 374.2039,
+      "p_value": 0.0,
+      "degrees_of_freedom": 2,
+      "cramers_v": 0.2305,
+      "significant_at_0_05": true
+    },
+    {
+      "variable": "streaming_movies",
+      "test": "chi_square",
+      "chi2_statistic": 375.6615,
+      "p_value": 0.0,
+      "degrees_of_freedom": 2,
+      "cramers_v": 0.231,
+      "significant_at_0_05": true
+    },
+    {
+      "variable": "contract",
+      "test": "chi_square",
+      "chi2_statistic": 1184.5966,
+      "p_value": 0.0,
+      "degrees_of_freedom": 2,
+      "cramers_v": 0.4101,
+      "significant_at_0_05": true
+    },
+    {
+      "variable": "paperless_billing",
+      "test": "chi_square",
+      "chi2_statistic": 258.2776,
+      "p_value": 0.0,
+      "degrees_of_freedom": 1,
+      "cramers_v": 0.1915,
+      "significant_at_0_05": true
+    },
+    {
+      "variable": "payment_method",
+      "test": "chi_square",
+      "chi2_statistic": 648.1423,
+      "p_value": 0.0,
+      "degrees_of_freedom": 3,
+      "cramers_v": 0.3034,
+      "significant_at_0_05": true
+    }
+  ],
+  "mann_whitney_tests": [
+    {
+      "variable": "tenure",
+      "test": "mann_whitney_u",
+      "u_statistic": 2515538.0,
+      "p_value": 0.0,
+      "median_churn_1": 10.0,
+      "median_churn_0": 38.0,
+      "mean_churn_1": 17.9791,
+      "mean_churn_0": 37.57,
+      "significant_at_0_05": true
+    },
+    {
+      "variable": "monthly_charges",
+      "test": "mann_whitney_u",
+      "u_statistic": 6003125.5,
+      "p_value": 0.0,
+      "median_churn_1": 79.65,
+      "median_churn_0": 64.425,
+      "mean_churn_1": 74.4413,
+      "mean_churn_0": 61.2651,
+      "significant_at_0_05": true
+    },
+    {
+      "variable": "total_charges",
+      "test": "mann_whitney_u",
+      "u_statistic": 3360665.0,
+      "p_value": 0.0,
+      "median_churn_1": 703.55,
+      "median_churn_0": 1683.6,
+      "mean_churn_1": 1531.7961,
+      "mean_churn_0": 2555.3441,
+      "significant_at_0_05": true
+    }
+  ],
+  "churn_rate_by_contract": [
+    {
+      "contract": "Month-to-month",
+      "total_customers": 3875,
+      "churn_customers": 1655,
+      "churn_rate": 0.4271,
+      "ci_95_low": 0.4116,
+      "ci_95_high": 0.4427
+    },
+    {
+      "contract": "One year",
+      "total_customers": 1473,
+      "churn_customers": 166,
+      "churn_rate": 0.1127,
+      "ci_95_low": 0.0975,
+      "ci_95_high": 0.1299
+    },
+    {
+      "contract": "Two year",
+      "total_customers": 1695,
+      "churn_customers": 48,
+      "churn_rate": 0.0283,
+      "ci_95_low": 0.0214,
+      "ci_95_high": 0.0373
+    }
+  ]
+}

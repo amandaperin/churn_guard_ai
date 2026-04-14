@@ -51,16 +51,18 @@ def main() -> None:
         stratify=y,
     )
 
-    print("Training final XGBoost model...")
+    print("Training final tuned XGBoost model...")
 
     model = XGBClassifier(
         random_state=42,
-        n_estimators=200,
-        learning_rate=0.05,
-        max_depth=4,
-        subsample=0.8,
-        colsample_bytree=0.8,
         eval_metric="logloss",
+        subsample=0.9,
+        n_estimators=100,
+        min_child_weight=1,
+        max_depth=3,
+        learning_rate=0.05,
+        gamma=0.3,
+        colsample_bytree=0.8,
     )
     model.fit(X_train, y_train)
 
@@ -77,6 +79,15 @@ def main() -> None:
         "threshold": THRESHOLD,
         "feature_columns": feature_columns,
         "model_name": "XGBoost",
+        "best_params": {
+            "subsample": 0.9,
+            "n_estimators": 100,
+            "min_child_weight": 1,
+            "max_depth": 3,
+            "learning_rate": 0.05,
+            "gamma": 0.3,
+            "colsample_bytree": 0.8,
+        },
     }
 
     print("Saving model...")
