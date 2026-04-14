@@ -177,6 +177,9 @@ docker compose up --build
 
 ## 📸 Screenshots 
 
+### Project Logo
+![Logo]()
+
 ### Swagger UI
 ![Swagger](swagger1.png)
 ![Swagger](swagger2.png)
